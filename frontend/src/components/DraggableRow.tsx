@@ -41,4 +41,4 @@ const DraggableRow = (props: any) => {
   );
 };
 
-export default DraggableRow; 
+export default React.memo(DraggableRow); 

@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { Table, Input, Spin } from 'antd';
 import { useItemsStore } from '../store/itemsStore';
 import styles from './ItemList.module.css';
@@ -73,9 +73,10 @@ const ItemList: React.FC = () => {
     },
   };
 
-  const sensors = useSensors(useSensor(PointerSensor));
+  const pointerSensor = useSensor(PointerSensor);
+  const sensors = useSensors(pointerSensor);
 
-  const handleDragEnd = (event: any) => {
+  const handleDragEnd = useCallback((event: any) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
       const oldIndex = items.findIndex((i) => i.id === active.id);
@@ -83,7 +84,7 @@ const ItemList: React.FC = () => {
       const newItems = arrayMove(items, oldIndex, newIndex);
       setItems(newItems);
     }
-  };
+  }, [items, setItems]);
 
   return (
     <div className={styles.root}>

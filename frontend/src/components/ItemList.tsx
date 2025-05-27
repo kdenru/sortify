@@ -43,7 +43,6 @@ const ItemList: React.FC = () => {
     fetchItems,
     fetchMore,
     hasMore,
-    selectedIds,
     setSelectedIds,
     search,
     setSearch,
@@ -55,6 +54,8 @@ const ItemList: React.FC = () => {
     fetchItems();
     // eslint-disable-next-line
   }, []);
+
+  const selectedIds = items.filter(i => i.selected).map(i => i.id);
 
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;

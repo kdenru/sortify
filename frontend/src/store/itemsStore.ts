@@ -4,12 +4,12 @@ import { devtools } from 'zustand/middleware';
 interface Item {
   id: number;
   value: number;
+  selected?: boolean;
 }
 
 interface ItemsState {
   items: Item[];
   loading: boolean;
-  selectedIds: number[];
   search: string;
   total: number;
   offset: number;
@@ -19,6 +19,7 @@ interface ItemsState {
   fetchItems: (search?: string) => Promise<void>;
   fetchMore: () => Promise<void>;
   setItems: (items: Item[]) => void;
+  saveState: () => Promise<void>;
 }
 
 const LIMIT = 20;
@@ -27,13 +28,17 @@ export const useItemsStore = create<ItemsState>()(
   devtools((set, get) => ({
     items: [],
     loading: false,
-    selectedIds: [],
     search: '',
     total: 0,
     offset: 0,
     hasMore: true,
     setSearch: (search) => set({ search }, false, 'items/setSearch'),
-    setSelectedIds: (ids) => set({ selectedIds: ids }, false, 'items/setSelectedIds'),
+    setSelectedIds: (ids) => {
+      // Меняем selected у items
+      const items = get().items.map(item => ({ ...item, selected: ids.includes(item.id) }));
+      set({ items }, false, 'items/setSelectedIds');
+      get().saveState();
+    },
     fetchItems: async (searchParam) => {
       set({ loading: true }, false, 'items/fetchItems');
       const search = searchParam !== undefined ? searchParam : get().search;
@@ -67,7 +72,24 @@ export const useItemsStore = create<ItemsState>()(
         total: data.total,
       }, false, 'items/fetchMore/success');
     },
-    setItems: (items) => set({ items }, false, 'items/setItems'),
+    setItems: (items) => {
+      set({ items }, false, 'items/setItems');
+      get().saveState();
+    },
+    saveState: async () => {
+      const items = get().items;
+      const selectedIds = items.filter(i => i.selected).map(i => i.id);
+      const sortedIds = items.map(i => i.id);
+      try {
+        await fetch('/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ selectedIds, sortedIds }),
+        });
+      } catch (e) {
+        // Можно залогать ошибку, если надо
+      }
+    },
   }), { name: 'ItemsStore' })
 );
 

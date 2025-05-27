@@ -1,4 +1,5 @@
 import { Item } from '../types/item';
+import { getState } from './state.service';
 
 const TOTAL = 1_000_000;
 
@@ -36,6 +37,15 @@ export function getItems({
     }
   }
 
+  // Получаем состояние пользователя
+  const { sortedIds, selectedIds } = getState();
+
+  // Если есть sortedIds, сортируем items по этому порядку
+  if (Array.isArray(sortedIds) && sortedIds.length > 0) {
+    const idToItem = Object.fromEntries(items.map(i => [i.id, i]));
+    items = sortedIds.map((id: number) => idToItem[id]).filter(Boolean);
+  }
+
   if (sortBy === 'value') {
     items.sort((a, b) => sortOrder === 'asc' ? a.value.localeCompare(b.value) : b.value.localeCompare(a.value));
   } else {
@@ -44,6 +54,14 @@ export function getItems({
 
   if (search) {
     items = items.slice(offset, offset + limit);
+  }
+
+  // Выставляем selected для каждого item
+  if (Array.isArray(selectedIds) && selectedIds.length > 0) {
+    const selectedSet = new Set(selectedIds);
+    items = items.map(item => ({ ...item, selected: selectedSet.has(item.id) }));
+  } else {
+    items = items.map(item => ({ ...item, selected: false }));
   }
 
   return {

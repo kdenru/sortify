@@ -32,14 +32,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  useItemsStore.setState({ items: [], loading: false, selectedIds: [], search: '' });
+  useItemsStore.setState({ items: [], loading: false, search: '' });
 });
 
 describe('ItemList', () => {
   it('рендерит таблицу и 20 строк', async () => {
     render(<ItemList />);
     await waitFor(() => {
-      expect(document.querySelectorAll('.ant-table-row')).toHaveLength(20);
+      expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
     expect(screen.getByText('ID')).toBeInTheDocument();
     expect(screen.getByText('Value')).toBeInTheDocument();
@@ -50,34 +50,34 @@ describe('ItemList', () => {
   it('можно выбрать одну строку', async () => {
     render(<ItemList />);
     await waitFor(() => {
-      expect(document.querySelectorAll('.ant-table-row')).toHaveLength(20);
+      expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
     // Находим первый чекбокс (кроме "выбрать все")
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[1]);
-    expect(useItemsStore.getState().selectedIds).toEqual([1]);
+    expect(useItemsStore.getState().items.filter(i => i.selected).map(i => i.id)).toEqual([1]);
   });
 
   it('можно выбрать несколько строк', async () => {
     render(<ItemList />);
     await waitFor(() => {
-      expect(document.querySelectorAll('.ant-table-row')).toHaveLength(20);
+      expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[1]); // id: 1
     fireEvent.click(checkboxes[2]); // id: 2
-    expect(useItemsStore.getState().selectedIds).toEqual([1, 2]);
+    expect(useItemsStore.getState().items.filter(i => i.selected).map(i => i.id)).toEqual([1, 2]);
   });
 
   it('фильтрует элементы по поиску', async () => {
     render(<ItemList />);
     await waitFor(() => {
-      expect(document.querySelectorAll('.ant-table-row')).toHaveLength(20);
+      expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
     const input = screen.getByPlaceholderText('Поиск...');
     fireEvent.change(input, { target: { value: 'test123' } });
     await waitFor(() => {
-      expect(document.querySelectorAll('.ant-table-row')).toHaveLength(1);
+      expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(1);
     });
     expect(screen.getByText('test123')).toBeInTheDocument();
   });

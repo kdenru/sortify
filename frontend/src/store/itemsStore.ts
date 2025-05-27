@@ -14,6 +14,7 @@ interface ItemsState {
   setSearch: (search: string) => void;
   setSelectedIds: (ids: number[]) => void;
   fetchItems: (search?: string) => Promise<void>;
+  setItems: (items: Item[]) => void;
 }
 
 export const useItemsStore = create<ItemsState>()(
@@ -34,6 +35,7 @@ export const useItemsStore = create<ItemsState>()(
       const data = await res.json();
       set({ items: data.items, loading: false }, false, 'items/fetchItems/success');
     },
+    setItems: (items) => set({ items }, false, 'items/setItems'),
   }), { name: 'ItemsStore' })
 );
 

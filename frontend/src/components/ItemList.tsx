@@ -16,11 +16,18 @@ const columns = [
 ];
 
 const ItemList: React.FC = () => {
-  const { items, loading, fetchItems } = useItemsStore();
+  const { items, loading, fetchItems, selectedIds, setSelectedIds } = useItemsStore();
 
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
+
+  const rowSelection = {
+    selectedRowKeys: selectedIds,
+    onChange: (selectedRowKeys: React.Key[]) => {
+      setSelectedIds(selectedRowKeys as number[]);
+    },
+  };
 
   if (loading) return <Spin />;
 
@@ -32,6 +39,7 @@ const ItemList: React.FC = () => {
         rowKey="id"
         size="middle"
         pagination={false}
+        rowSelection={rowSelection}
       />
     </div>
   );

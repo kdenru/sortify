@@ -22,7 +22,7 @@ const ItemList: React.FC = () => {
     fetchItems();
   }, [fetchItems]);
 
-  if (loading) return <Spin tip="Загрузка..." />;
+  if (loading) return <Spin />;
 
   return (
     <div>

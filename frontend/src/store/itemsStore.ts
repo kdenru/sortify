@@ -20,4 +20,7 @@ export const useItemsStore = create<ItemsState>((set) => ({
     const data = await res.json();
     set({ items: data.items, loading: false });
   },
-})); 
+}));
+
+// Экспортируем storeApi для сброса в тестах
+export const itemsStoreApi = useItemsStore; 

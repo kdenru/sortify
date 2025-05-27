@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { RequestHandler } from 'express';
 import { getItems } from '../services/items.service';
 
-export function getItemsController(req: Request, res: Response) {
+export const getItemsController: RequestHandler = (req, res) => {
   const limit = Math.max(1, Math.min(100, parseInt(req.query.limit as string) || 20));
   const offset = Math.max(0, parseInt(req.query.offset as string) || 0);
   const search = (req.query.search as string) || '';
@@ -11,4 +11,4 @@ export function getItemsController(req: Request, res: Response) {
   const { items, total } = getItems({ offset, limit, search, sortBy, sortOrder });
 
   res.json({ items, total, offset, limit });
-} 
+}; 

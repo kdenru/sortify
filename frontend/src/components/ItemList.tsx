@@ -19,6 +19,12 @@ import DraggableRow from './DraggableRow';
 
 const columns = [
   {
+    title: '',
+    dataIndex: 'drag',
+    key: 'drag',
+    width: 64,
+  },
+  {
     title: 'ID',
     dataIndex: 'id',
     key: 'id',

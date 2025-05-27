@@ -19,7 +19,6 @@ interface ItemsState {
   fetchItems: (search?: string) => Promise<void>;
   fetchMore: () => Promise<void>;
   setItems: (items: Item[]) => void;
-  saveState: () => Promise<void>;
 }
 
 const LIMIT = 20;
@@ -33,11 +32,16 @@ export const useItemsStore = create<ItemsState>()(
     offset: 0,
     hasMore: true,
     setSearch: (search) => set({ search }, false, 'items/setSearch'),
-    setSelectedIds: (ids) => {
-      // Меняем selected у items
+    setSelectedIds: async (ids) => {
+      // Меняем selected у items локально
       const items = get().items.map(item => ({ ...item, selected: ids.includes(item.id) }));
       set({ items }, false, 'items/setSelectedIds');
-      get().saveState();
+      // Отправляем на бэк
+      await fetch('/items/select', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ selectedIds: ids }),
+      });
     },
     fetchItems: async (searchParam) => {
       set({ loading: true }, false, 'items/fetchItems');
@@ -72,23 +76,15 @@ export const useItemsStore = create<ItemsState>()(
         total: data.total,
       }, false, 'items/fetchMore/success');
     },
-    setItems: (items) => {
+    setItems: async (items) => {
       set({ items }, false, 'items/setItems');
-      get().saveState();
-    },
-    saveState: async () => {
-      const items = get().items;
-      const selectedIds = items.filter(i => i.selected).map(i => i.id);
+      // Отправляем новый порядок на бэк
       const sortedIds = items.map(i => i.id);
-      try {
-        await fetch('/state', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ selectedIds, sortedIds }),
-        });
-      } catch (e) {
-        // Можно залогать ошибку, если надо
-      }
+      await fetch('/items/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sortedIds }),
+      });
     },
   }), { name: 'ItemsStore' })
 );

@@ -1,4 +1,11 @@
 .input {
   margin-bottom: 16px;
   width: 100%;
+}
+
+.tableScroll {
+  height: 80vh;
+  overflow: auto;
+  background: #fff;
+  border-radius: 8px;
 } 

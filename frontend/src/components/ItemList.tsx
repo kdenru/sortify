@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
-import { Table, Input } from 'antd';
+import { Table, Input, Spin } from 'antd';
 import { useItemsStore } from '../store/itemsStore';
 import styles from './ItemList.module.css';
+import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   DndContext,
   closestCenter,
@@ -30,7 +31,17 @@ const columns = [
 ];
 
 const ItemList: React.FC = () => {
-  const { items, loading, fetchItems, selectedIds, setSelectedIds, search, setSearch } = useItemsStore();
+  const {
+    items,
+    loading,
+    fetchItems,
+    fetchMore,
+    hasMore,
+    selectedIds,
+    setSelectedIds,
+    search,
+    setSearch,
+  } = useItemsStore();
   const setItems = useItemsStore((s) => s.setItems);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -76,19 +87,33 @@ const ItemList: React.FC = () => {
         className={styles.input}
         allowClear
       />
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-          <Table
-            dataSource={items}
-            columns={columns}
-            rowKey="id"
-            pagination={false}
-            rowSelection={rowSelection}
-            loading={loading}
-            components={{ body: { row: DraggableRow } }}
-          />
-        </SortableContext>
-      </DndContext>
+      <div
+        id="scrollableTable"
+        className={styles.tableScroll}
+      >
+        <InfiniteScroll
+          dataLength={items.length}
+          next={fetchMore}
+          hasMore={hasMore}
+          loader={<div style={{ textAlign: 'center', padding: 16 }}><Spin /></div>}
+          scrollableTarget="scrollableTable"
+          style={{ overflow: 'visible' }}
+        >
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+              <Table
+                dataSource={items}
+                columns={columns}
+                rowKey="id"
+                pagination={false}
+                rowSelection={rowSelection}
+                loading={loading && items.length === 0}
+                components={{ body: { row: DraggableRow } }}
+              />
+            </SortableContext>
+          </DndContext>
+        </InfiniteScroll>
+      </div>
     </div>
   );
 };

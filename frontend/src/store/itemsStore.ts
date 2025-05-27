@@ -10,19 +10,27 @@ interface ItemsState {
   items: Item[];
   loading: boolean;
   selectedIds: number[];
+  search: string;
+  setSearch: (search: string) => void;
   setSelectedIds: (ids: number[]) => void;
-  fetchItems: () => Promise<void>;
+  fetchItems: (search?: string) => Promise<void>;
 }
 
 export const useItemsStore = create<ItemsState>()(
-  devtools((set) => ({
+  devtools((set, get) => ({
     items: [],
     loading: false,
     selectedIds: [],
+    search: '',
+    setSearch: (search) => set({ search }, false, 'items/setSearch'),
     setSelectedIds: (ids) => set({ selectedIds: ids }, false, 'items/setSelectedIds'),
-    fetchItems: async () => {
+    fetchItems: async (searchParam) => {
       set({ loading: true }, false, 'items/fetchItems');
-      const res = await fetch('/items?limit=20&offset=0');
+      const search = searchParam !== undefined ? searchParam : get().search;
+      const url = search
+        ? `/items?limit=20&offset=0&search=${encodeURIComponent(search)}`
+        : '/items?limit=20&offset=0';
+      const res = await fetch(url);
       const data = await res.json();
       set({ items: data.items, loading: false }, false, 'items/fetchItems/success');
     },

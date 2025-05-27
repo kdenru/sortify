@@ -24,7 +24,10 @@ export function getItems({
 
 export function reorderItems(newOrder: number[]): void {
   const idToItem = Object.fromEntries(items.map(i => [i.id, i]));
-  items = newOrder.map(id => idToItem[id]).filter(Boolean);
+  // Переставляем только те, что есть в newOrder, остальные добавляем в конец в старом порядке
+  const reordered = newOrder.map(id => idToItem[id]).filter(Boolean);
+  const rest = items.filter(i => !newOrder.includes(i.id));
+  items = [...reordered, ...rest];
 }
 
 export function selectItems(selectedIds: number[]): void {

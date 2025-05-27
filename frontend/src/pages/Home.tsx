@@ -1,7 +1,9 @@
+import ItemList from '../components/ItemList';
+import styles from './Home.module.css';
+
 const Home = () => (
-  <div>
-    <h1>Sortify</h1>
-    <div>Здесь будет таблица</div>
+  <div className={styles.root}>
+    <ItemList />
   </div>
 );
 

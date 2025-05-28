@@ -78,5 +78,5 @@ export const useItemsStore = create<ItemsState>()(
   }), { name: 'ItemsStore' })
 );
 
-// Экспортируем storeApi для сброса в тестах
+// Экспортируем storeApi для сброса в тестах (используется только в тестах)
 export const itemsStoreApi = useItemsStore; 

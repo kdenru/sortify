@@ -1,3 +1,4 @@
+// Обёртка для drag&drop строки таблицы (используется с dnd-kit)
 import React, { forwardRef } from 'react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';

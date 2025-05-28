@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useCallback } from 'react';
-import { Table, Input, Spin } from 'antd';
+import { Table, Input } from 'antd';
 import { useItemsStore } from '../store/itemsStore';
 import styles from './ItemList.module.css';
 import {
@@ -124,14 +124,11 @@ const ItemList: React.FC = () => {
             loading={loading && items.length === 0}
             components={{ body: { row: DraggableRow } }}
             virtual
-            scroll={{ y: 1000, x: 10 }}
+            scroll={{ y: 830, x: 10 }}
             onScroll={handleTableScroll}
           />
         </SortableContext>
       </DndContext>
-      {loading && items.length > 0 && (
-        <div style={{ textAlign: 'center', padding: 16 }}><Spin /></div>
-      )}
     </div>
   );
 };

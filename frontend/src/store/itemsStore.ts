@@ -60,7 +60,7 @@ export const useItemsStore = create<ItemsState>()(
       }, false, 'items/fetchItems/success');
     },
     fetchMore: async () => {
-      const { search, offset, items, total, loading, hasMore } = get();
+      const { search, offset, items, loading, hasMore } = get();
       if (loading || !hasMore) return;
       set({ loading: true }, false, 'items/fetchMore');
       const url = search

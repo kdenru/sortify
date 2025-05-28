@@ -2,7 +2,6 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { Table, Input, Spin } from 'antd';
 import { useItemsStore } from '../store/itemsStore';
 import styles from './ItemList.module.css';
-import InfiniteScroll from 'react-infinite-scroll-component';
 import {
   DndContext,
   closestCenter,
@@ -18,12 +17,6 @@ import {
 import DraggableRow from './DraggableRow';
 
 const columns = [
-  {
-    title: '',
-    dataIndex: 'drag',
-    key: 'drag',
-    width: 64,
-  },
   {
     title: 'ID',
     dataIndex: 'id',
@@ -73,7 +66,11 @@ const ItemList: React.FC = () => {
     },
   };
 
-  const pointerSensor = useSensor(PointerSensor);
+  const pointerSensor = useSensor(PointerSensor, {
+    activationConstraint: {
+      distance: 5,
+    },
+  });
   const sensors = useSensors(pointerSensor);
 
   const handleDragEnd = useCallback((event: any) => {
@@ -86,6 +83,15 @@ const ItemList: React.FC = () => {
     }
   }, [items, setItems]);
 
+  // Подгрузка данных при скролле вниз
+  const handleTableScroll = (e: any) => {
+    if (!e || !e.currentTarget) return;
+    const { scrollTop, scrollHeight, clientHeight } = e.currentTarget;
+    if (scrollHeight - scrollTop - clientHeight < 200 && !loading && hasMore) {
+      fetchMore();
+    }
+  };
+
   return (
     <div className={styles.root}>
       <Input
@@ -95,33 +101,25 @@ const ItemList: React.FC = () => {
         className={styles.input}
         allowClear
       />
-      <div
-        id="scrollableTable"
-        className={styles.tableScroll}
-      >
-        <InfiniteScroll
-          dataLength={items.length}
-          next={fetchMore}
-          hasMore={hasMore}
-          loader={<div style={{ textAlign: 'center', padding: 16 }}><Spin /></div>}
-          scrollableTarget="scrollableTable"
-          style={{ overflow: 'visible' }}
-        >
-          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
-              <Table
-                dataSource={items}
-                columns={columns}
-                rowKey="id"
-                pagination={false}
-                rowSelection={rowSelection}
-                loading={loading && items.length === 0}
-                components={{ body: { row: DraggableRow } }}
-              />
-            </SortableContext>
-          </DndContext>
-        </InfiniteScroll>
-      </div>
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+        <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
+          <Table
+            dataSource={items}
+            columns={columns}
+            rowKey="id"
+            pagination={false}
+            rowSelection={rowSelection}
+            loading={loading && items.length === 0}
+            components={{ body: { row: DraggableRow } }}
+            virtual
+            scroll={{ y: 1000, x: 10 }}
+            onScroll={handleTableScroll}
+          />
+        </SortableContext>
+      </DndContext>
+      {loading && items.length > 0 && (
+        <div style={{ textAlign: 'center', padding: 16 }}><Spin /></div>
+      )}
     </div>
   );
 };

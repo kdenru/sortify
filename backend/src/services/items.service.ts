@@ -22,12 +22,13 @@ export function getItems({
   return { items: paged, total };
 }
 
-export function reorderItems(newOrder: number[]): void {
-  const idToItem = Object.fromEntries(items.map(i => [i.id, i]));
-  // Переставляем только те, что есть в newOrder, остальные добавляем в конец в старом порядке
-  const reordered = newOrder.map(id => idToItem[id]).filter(Boolean);
-  const rest = items.filter(i => !newOrder.includes(i.id));
-  items = [...reordered, ...rest];
+export function reorderItemGlobally(movedId: number, beforeId: number | null): void {
+  const idx = items.findIndex(i => i.id === movedId);
+  if (idx === -1) return;
+  const [moved] = items.splice(idx, 1);
+  let insertIdx = beforeId ? items.findIndex(i => i.id === beforeId) : 0;
+  if (insertIdx === -1) insertIdx = 0;
+  items.splice(insertIdx, 0, moved);
 }
 
 export function selectItems(selectedIds: number[]): void {

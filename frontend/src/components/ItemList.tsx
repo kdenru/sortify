@@ -40,7 +40,6 @@ const ItemList: React.FC = () => {
     search,
     setSearch,
   } = useItemsStore();
-  const setItems = useItemsStore((s) => s.setItems);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -73,15 +72,29 @@ const ItemList: React.FC = () => {
   });
   const sensors = useSensors(pointerSensor);
 
-  const handleDragEnd = useCallback((event: any) => {
+  const handleDragEnd = useCallback(async (event: any) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
       const oldIndex = items.findIndex((i) => i.id === active.id);
       const newIndex = items.findIndex((i) => i.id === over.id);
-      const newItems = arrayMove(items, oldIndex, newIndex);
-      setItems(newItems);
+      // movedId — id перетаскиваемого
+      const movedId = items[oldIndex].id;
+      let beforeId: number | null;
+      if (oldIndex < newIndex) {
+        // Двигаем вниз — вставляем после newIndex, значит beforeId следующий элемент
+        beforeId = items[newIndex + 1]?.id ?? null;
+      } else {
+        // Двигаем вверх — вставляем перед newIndex
+        beforeId = items[newIndex].id;
+      }
+      await fetch('/items/reorder', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ movedId, beforeId }),
+      });
+      fetchItems(search); // обновляем список
     }
-  }, [items, setItems]);
+  }, [items, fetchItems, search]);
 
   // Подгрузка данных при скролле вниз
   const handleTableScroll = (e: any) => {

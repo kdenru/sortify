@@ -18,7 +18,6 @@ interface ItemsState {
   setSelectedIds: (ids: number[]) => void;
   fetchItems: (search?: string) => Promise<void>;
   fetchMore: () => Promise<void>;
-  setItems: (items: Item[]) => void;
 }
 
 const LIMIT = 20;
@@ -75,16 +74,6 @@ export const useItemsStore = create<ItemsState>()(
         hasMore: offset + data.items.length < data.total,
         total: data.total,
       }, false, 'items/fetchMore/success');
-    },
-    setItems: async (items) => {
-      set({ items }, false, 'items/setItems');
-      // Отправляем новый порядок на бэк
-      const sortedIds = items.map(i => i.id);
-      await fetch('/items/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sortedIds }),
-      });
     },
   }), { name: 'ItemsStore' })
 );

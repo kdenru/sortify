@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getItemsController, /*reorderItemsController,*/ selectItemsController, reorderItemGloballyController } from '../controllers/items.controller';
+import { getItemsController, selectItemsController, reorderItemGloballyController } from '../controllers/items.controller';
 
 const router = Router();
 

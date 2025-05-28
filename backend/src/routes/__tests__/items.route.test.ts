@@ -42,11 +42,15 @@ describe('/items route', () => {
 
   it('POST /items/reorder меняет порядок айтемов', async () => {
     const res1 = await request(app).get('/items?limit=3');
-    const ids = res1.body.items.map((i: any) => i.id);
-    const reversed = [...ids].reverse();
-    const res2 = await request(app).post('/items/reorder').send({ sortedIds: reversed });
+    const ids = res1.body.items.map((i: any) => i.id); // [1,2,3]
+    // Сначала перемещаем 3 перед 1 => [3,1,2]
+    let res2 = await request(app).post('/items/reorder').send({ movedId: ids[2], beforeId: ids[0] });
     expect(res2.status).toBe(204);
-    const res3 = await request(app).get('/items?limit=3');
-    expect(res3.body.items.map((i: any) => i.id)).toEqual(reversed);
+    // Потом перемещаем 2 перед 1 => [3,2,1]
+    let res3 = await request(app).post('/items/reorder').send({ movedId: ids[1], beforeId: ids[0] });
+    expect(res3.status).toBe(204);
+    // Проверяем порядок
+    const res4 = await request(app).get('/items?limit=3');
+    expect(res4.body.items.map((i: any) => i.id)).toEqual([ids[2], ids[1], ids[0]]);
   });
 }); 

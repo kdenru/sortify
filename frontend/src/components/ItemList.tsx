@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useCallback } from 'react';
 import { Table, Input } from 'antd';
 import { useItemsStore } from '../store/itemsStore';
+import type { Item } from '../store/itemsStore';
 import styles from './ItemList.module.css';
 import {
   DndContext,
@@ -45,13 +46,12 @@ const ItemList: React.FC<ItemListProps> = (props) => {
     setSearch,
   } = useItemsStore();
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const selectedIds = useItemsStore(state => state.selectedIds);
 
   useEffect(() => {
     fetchItems();
     // eslint-disable-next-line
   }, []);
-
-  const selectedIds = items.filter(i => i.selected).map(i => i.id);
 
   const onSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -65,7 +65,17 @@ const ItemList: React.FC<ItemListProps> = (props) => {
   const rowSelection = {
     selectedRowKeys: selectedIds,
     onChange: (selectedRowKeys: React.Key[]) => {
-      setSelectedIds(selectedRowKeys as number[]);
+      let nextSelected = [...selectedIds];
+      // Добавляем новые id
+      for (const item of items) {
+        const isChecked = (selectedRowKeys as number[]).includes(item.id);
+        if (isChecked && !nextSelected.includes(item.id)) {
+          nextSelected.push(item.id);
+        } else if (!isChecked && nextSelected.includes(item.id)) {
+          nextSelected = nextSelected.filter(id => id !== item.id);
+        }
+      }
+      setSelectedIds(nextSelected);
     },
   };
 

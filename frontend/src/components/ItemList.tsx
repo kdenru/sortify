@@ -76,29 +76,45 @@ const ItemList: React.FC<ItemListProps> = (props) => {
   });
   const sensors = useSensors(pointerSensor);
 
+  const reorderItems = (items: { id: number; value: any; selected?: boolean }[], oldIndex: number, newIndex: number) => {
+    const updated = [...items];
+    const [removed] = updated.splice(oldIndex, 1);
+    updated.splice(newIndex, 0, removed);
+    return updated;
+  };
+
   const handleDragEnd = useCallback(async (event: any) => {
     const { active, over } = event;
     if (active.id !== over?.id) {
       const oldIndex = items.findIndex((i) => i.id === active.id);
       const newIndex = items.findIndex((i) => i.id === over.id);
-      // movedId — id перетаскиваемого
-      const movedId = items[oldIndex].id;
-      let beforeId: number | null;
-      if (oldIndex < newIndex) {
-        // Двигаем вниз — вставляем после newIndex, значит beforeId следующий элемент
-        beforeId = items[newIndex + 1]?.id ?? null;
-      } else {
-        // Двигаем вверх — вставляем перед newIndex
-        beforeId = items[newIndex].id;
+
+      // Оптимистик апдейт
+      const prevItems = items;
+      const newItems = reorderItems(items, oldIndex, newIndex);
+      useItemsStore.setState({ items: newItems });
+
+      try {
+        const movedId = items[oldIndex].id;
+        let beforeId: number | null;
+        if (oldIndex < newIndex) {
+          beforeId = items[newIndex + 1]?.id ?? null;
+        } else {
+          beforeId = items[newIndex].id;
+        }
+        await fetch('/items/reorder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ movedId, beforeId }),
+        });
+        // Не делаем fetchItems, оставляем оптимистик порядок
+      } catch (e) {
+        // Откат если ошибка
+        useItemsStore.setState({ items: prevItems });
+        // Можно показать ошибку, если надо
       }
-      await fetch('/items/reorder', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ movedId, beforeId }),
-      });
-      fetchItems(search); // обновляем список
     }
-  }, [items, fetchItems, search]);
+  }, [items]);
 
   // Подгрузка данных при скролле вниз
   const handleTableScroll = (e: any) => {

@@ -1,4 +1,5 @@
 import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import ItemList from './ItemList';
 import { useItemsStore } from '../store/itemsStore';
 
@@ -32,7 +33,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  useItemsStore.setState({ items: [], loading: false, search: '' });
+  useItemsStore.setState({
+    items: [],
+    loading: false,
+    search: '',
+    selectedIds: [],
+  });
 });
 
 describe('ItemList', () => {
@@ -66,7 +72,9 @@ describe('ItemList', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[1]); // id: 1
     fireEvent.click(checkboxes[2]); // id: 2
-    expect(useItemsStore.getState().items.filter(i => i.selected).map(i => i.id)).toEqual([1, 2]);
+    await waitFor(() => {
+      expect(useItemsStore.getState().items.filter(i => i.selected).map(i => i.id)).toEqual([1, 2]);
+    });
   });
 
   it('фильтрует элементы по поиску', async () => {

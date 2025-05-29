@@ -35,6 +35,8 @@ export const useItemsStore = create<ItemsState>()(
     setSearch: (search) => set({ search }, false, 'items/setSearch'),
     setSelectedIds: async (ids) => {
       set({ selectedIds: ids }, false, 'items/setSelectedIds');
+      const items = get().items.map(item => ({ ...item, selected: ids.includes(item.id) }));
+      set({ items }, false, 'items/setSelectedOnItems');
       // Отправляем на бэк
       await fetch('/items/select', {
         method: 'POST',

@@ -37,7 +37,7 @@ afterEach(() => {
 
 describe('ItemList', () => {
   it('рендерит таблицу и 20 строк', async () => {
-    render(<ItemList />);
+    render(<ItemList disableVirtual />);
     await waitFor(() => {
       expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
@@ -48,7 +48,7 @@ describe('ItemList', () => {
   });
 
   it('можно выбрать одну строку', async () => {
-    render(<ItemList />);
+    render(<ItemList disableVirtual />);
     await waitFor(() => {
       expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
@@ -59,7 +59,7 @@ describe('ItemList', () => {
   });
 
   it('можно выбрать несколько строк', async () => {
-    render(<ItemList />);
+    render(<ItemList disableVirtual />);
     await waitFor(() => {
       expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });
@@ -70,7 +70,7 @@ describe('ItemList', () => {
   });
 
   it('фильтрует элементы по поиску', async () => {
-    render(<ItemList />);
+    render(<ItemList disableVirtual />);
     await waitFor(() => {
       expect(screen.getAllByRole('row').filter(row => row.hasAttribute('data-row-key'))).toHaveLength(20);
     });

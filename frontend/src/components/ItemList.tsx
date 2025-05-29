@@ -28,7 +28,12 @@ const columns = [
   },
 ];
 
-const ItemList: React.FC = () => {
+interface ItemListProps {
+  disableVirtual?: boolean;
+}
+
+const ItemList: React.FC<ItemListProps> = (props) => {
+  const { disableVirtual } = props;
   const {
     items,
     loading,
@@ -122,10 +127,9 @@ const ItemList: React.FC = () => {
             pagination={false}
             rowSelection={rowSelection}
             loading={loading && items.length === 0}
-            components={{ body: { row: DraggableRow } }}
-            virtual
             scroll={{ y: 830, x: 10 }}
             onScroll={handleTableScroll}
+            {...(!disableVirtual ? { virtual: true, components: { body: { row: DraggableRow } } } : {})}
           />
         </SortableContext>
       </DndContext>
